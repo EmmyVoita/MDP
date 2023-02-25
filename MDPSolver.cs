@@ -15,53 +15,77 @@ public class MDPSolver
         this.policy = new int[mdp.numStates];
     }
 
+
     public void ValueIteration(float epsilon)
     {
-        float delta = 0;
-
-        do
+        // Initialize the values of all states to 0
+        for (int i = 0; i < mdp.numStates; i++)
         {
-            delta = 0f;
+            values[i] = 0.0f;
+        }
 
-            foreach (State state in mdp.states)
+        // Perform value iteration until convergence
+        bool converged = false;
+        while (!converged)
+        {
+            float delta = 0.0f;
+
+            // Compute the new value of each state as the maximum expected reward over all actions
+            for (int i = 0; i < mdp.numStates; i++)
             {
+                State state = mdp.states[i];
+
                 if (!state.isTerminal)
                 {
-                    float v = state.reward;
-                    state.reward = float.NegativeInfinity;
+                    float oldValue = values[i];
+                    float newValue = float.NegativeInfinity;
 
-                    foreach (MDP.Action action in Enum.GetValues(typeof(MDP.Action)))
+                    foreach (MDP.Action action in state.actions)
                     {
-                        if (state.transitionProbabilities.ContainsKey(action))
+                        float q = 0.0f;
+
+                        // Compute the expected reward for taking the given action in the current state
+                        for (int j = 0; j < mdp.numStates; j++)
                         {
-                            float q = 0f;
+                            float probability = state.transitionProbabilities[action][j];
+                            q += probability * values[j];
+                        }
 
-                            foreach (State nextState in mdp.states)
-                            {
-
-                                //Debug.Log("id: " + nextState.id + "  position: " + nextState.position + " reward: " + nextState.reward);
-
-
-                                if (state.transitionProbabilities.ContainsKey(action) && state.transitionProbabilities[action].Contains(nextState.id))
-                                {
-                                    Debug.Log($"transitionProbabilities for action {action} does contain key {nextState.id}");
-                                    q += state.transitionProbabilities[action][nextState.id] * nextState.reward;
-                                }
-                                else
-                                {
-                                    Debug.Log($"transitionProbabilities for action {action} does not contain key {nextState.id}");
-                                }
-
-                            }
-
-                            state.reward = Mathf.Max(state.reward, mdp.ExpectedReward(state, action) + mdp.discountFactor * q);
+                        // Compute the new value of the state as the maximum expected reward over all actions
+                        float value = ExpectedReward(state, action) + mdp.discountFactor * q;
+                        if (value > newValue)
+                        {
+                            newValue = value;
                         }
                     }
 
-                    delta = Mathf.Max(delta, Mathf.Abs(v - state.reward));
+                    values[i] = newValue;
+                    delta = Mathf.Max(delta, Mathf.Abs(newValue - oldValue));
                 }
             }
-        } while (delta > epsilon);
+
+            if (delta < epsilon)
+            {
+                converged = true;
+            }
+        }
+
+        CalculatePolicyFromValues();
+    }
+
+    public float ExpectedReward(State state, MDP.Action action)
+    {
+        float expectedReward = 0.0f;
+
+        // Compute the expected reward as the sum of the rewards weighted by the transition probabilities
+        foreach (State nextState in mdp.states)
+        {
+            float transitionProb = state.transitionProbabilities[action][nextState.id];
+            float reward = nextState.reward;
+            expectedReward += transitionProb * (reward + mdp.discountFactor * values[nextState.id]);
+        }
+
+        return expectedReward;
     }
 
     public int GetPolicy(int stateId)
@@ -87,12 +111,13 @@ public class MDPSolver
                 {
                     float q = 0f;
 
-                    foreach (State nextState in mdp.states)
+                    // Compute the expected value of the next state using the precomputed values array
+                    for (int nextStateId = 0; nextStateId < mdp.numStates; nextStateId++)
                     {
-                        q += state.transitionProbabilities[action][nextState.id] * nextState.reward;
+                        q += state.transitionProbabilities[action][nextStateId] * values[nextStateId];
                     }
 
-                    float value = mdp.ExpectedReward(state, action) + mdp.discountFactor * q;
+                    float value = q;
 
                     if (value > maxValue)
                     {
