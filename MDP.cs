@@ -24,18 +24,7 @@ public class MDP
         this.states = states;
     }
 
-    public float ExpectedReward(State state, Action action)
-    {
-        float expectedReward = 0.0f;
-
-        // Compute the expected reward as the sum of the rewards weighted by the transition probabilities
-        for (int nextStateId = 0; nextStateId < numStates; nextStateId++)
-        {
-            expectedReward += state.transitionProbabilities[action][nextStateId] * states[nextStateId].reward;
-        }
-
-        return expectedReward;
-    }
+ 
 
     public State NextState(State state, Action action)
     {
