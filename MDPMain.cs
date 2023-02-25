@@ -47,10 +47,10 @@ public class MDPMain : MonoBehaviour
 
                     float p = 0.25f;
 
-                    transitionProbabilities[MDP.Action.MoveUp] = new List<float>() { p, 0f, 0f, 0f };
-                    transitionProbabilities[MDP.Action.MoveDown] = new List<float>() { 0f, p, 0f, 0f };
-                    transitionProbabilities[MDP.Action.MoveLeft] = new List<float>() { 0f, 0f, p, 0f };
-                    transitionProbabilities[MDP.Action.MoveRight] = new List<float>() { 0f, 0f, 0f, p };
+                    transitionProbabilities[MDP.Action.MoveUp] = new List<float>() { 0.1f, 0.8f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+                    transitionProbabilities[MDP.Action.MoveDown] = new List<float>() { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.8f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+                    transitionProbabilities[MDP.Action.MoveLeft] = new List<float>() { 0.0f, 0.0f, 0.0f, 0.0f, 0.1f, 0.0f, 0.1f, 0.8f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
+                    transitionProbabilities[MDP.Action.MoveRight] = new List<float>() { 0.0f, 0.0f, 0.0f, 0.0f, 0.8f, 0.1f, 0.0f, 0.1f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f };
                 }
 
                 State state = new State(id, position, reward, isTerminal, actions, transitionProbabilities);
@@ -76,3 +76,4 @@ public class MDPMain : MonoBehaviour
     }
 
 }
+
